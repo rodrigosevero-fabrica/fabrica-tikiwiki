@@ -1,0 +1,10 @@
+apache:
+    image: rodrigosevero/fabrica-apache
+    ports:
+        - "8080:80"
+    volumes:
+        - /home/rodrigo/devel/fabrica-docker-tikiwiki/www-root/:/var/www/html
+    links:
+        - fpm
+fpm:
+    image: rodrigosevero/fabrica-php-fpm
