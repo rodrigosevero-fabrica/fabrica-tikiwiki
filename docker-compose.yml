@@ -3,8 +3,10 @@ apache:
     ports:
         - "8080:80"
     volumes:
-        - /home/rodrigo/devel/fabrica-docker-tikiwiki/www-root/:/var/www/html
+        - /home/rodrigo/devel/docker/fabrica-tikiwiki/www-root:/var/www/html
     links:
         - fpm
 fpm:
-    image: rodrigosevero/fabrica-php-fpm
+    image: rodrigosevero/fabrica-php-fpm:0.1
+    volumes:
+        - /home/rodrigo/devel/docker/fabrica-tikiwiki/www-root:/var/www/html
