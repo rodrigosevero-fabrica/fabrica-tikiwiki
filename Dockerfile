@@ -45,13 +45,13 @@ RUN echo "${HTTPS_PROXY_CERT}" > /usr/local/share/ca-certificates/https_proxy.cr
     && chown -R www-data /var/www/html/templates/
 
 VOLUME [ \
-    "/var/www/html/files/", \
-    "/var/www/html/img/trackers/", \
-    "/var/www/html/img/wiki_up/", \
-    "/var/www/html/img/wiki/", \
-    "/var/www/html/modules/cache/", \
-    "/var/www/html/storage/", \
-    "/var/www/html/temp/", \
+    "${WORKDIR}/files/", \
+    "${WORKDIR}/img/trackers/", \
+    "${WORKDIR}/img/wiki_up/", \
+    "${WORKDIR}/img/wiki/", \
+    "${WORKDIR}/modules/cache/", \
+    "${WORKDIR}/storage/", \
+    "${WORKDIR}/temp/", \
     "/var/www/sessions/" \
 ]
 EXPOSE 80 443
