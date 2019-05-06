@@ -1,8 +1,10 @@
 FROM montefuscolo/php:7.1-apache
 MAINTAINER Rodrigo Severo <rodrigo@fabricadeideias.com>
 
-ARG TIKI_SOURCE="https://sourceforge.net/projects/tikiwiki/files/Tiki_18.x_Alcyone/18.3/tiki-18.3.tar.gz/download"
 WORKDIR "/var/www/html"
+
+ARG TIKI_SOURCE="https://sourceforge.net/projects/tikiwiki/files/Tiki_18.x_Alcyone/18.3/tiki-18.3.tar.gz/download"
+ARG WORKDIR="/var/www/html"
 ARG SESSIONS_DIR="/var/www/sessions"
 
 # If you have https_proxy with SslBump, place it's cetificate
