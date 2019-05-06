@@ -3,6 +3,7 @@ MAINTAINER Rodrigo Severo <rodrigo@fabricadeideias.com>
 
 ARG TIKI_SOURCE="https://sourceforge.net/projects/tikiwiki/files/Tiki_18.x_Alcyone/18.3/tiki-18.3.tar.gz/download"
 WORKDIR "/var/www/html"
+ARG SESSIONS_DIR="/var/www/sessions"
 
 # If you have https_proxy with SslBump, place it's cetificate
 # in this variable to have curl and composer content cached
@@ -11,10 +12,10 @@ ARG HTTPS_PROXY_CERT=""
 RUN echo "${HTTPS_PROXY_CERT}" > /usr/local/share/ca-certificates/https_proxy.crt \
     && update-ca-certificates \
     && curl -o tiki.tar.gz -L "${TIKI_SOURCE}" \
-    && chown root: /var/www/html \
-    && tar -C /var/www/html --no-same-owner -zxf tiki.tar.gz --strip 1 \
+    && chown root: ${WORKDIR} \
+    && tar -C ${WORKDIR} --no-same-owner -zxf tiki.tar.gz --strip 1 \
     && composer global require hirak/prestissimo \
-    && composer install --working-dir /var/www/html/vendor_bundled --prefer-dist \
+    && composer install --working-dir ${WORKDIR}/vendor_bundled --prefer-dist \
     && rm tiki.tar.gz \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* \ 
@@ -27,22 +28,21 @@ RUN echo "${HTTPS_PROXY_CERT}" > /usr/local/share/ca-certificates/https_proxy.cr
         echo "    \$user_tiki      = getenv('TIKI_DB_USER');"; \
         echo "    \$pass_tiki      = getenv('TIKI_DB_PASS');"; \
         echo "    \$dbs_tiki       = getenv('TIKI_DB_NAME') ?: 'tikiwiki';"; \
-        echo "    \$client_charset = 'utf8mb4';"; \
-    } > /var/www/html/db/local.php \
+    } > ${WORKDIR}/db/local.php \
     && {\
-        echo "session.save_path=/var/www/sessions"; \
+        echo "session.save_path=${SESSIONS_DIR}"; \
     }  > /usr/local/etc/php/conf.d/tiki_session.ini \
     && /bin/bash htaccess.sh \
-    && mkdir -p /var/www/sessions \
-    && chown -R www-data /var/www/sessions \
-    && chown -R www-data /var/www/html/db/ \
-    && chown -R www-data /var/www/html/dump/ \
-    && chown -R www-data /var/www/html/img/trackers/ \
-    && chown -R www-data /var/www/html/img/wiki/ \
-    && chown -R www-data /var/www/html/img/wiki_up/ \
-    && chown -R www-data /var/www/html/modules/cache/ \
-    && chown -R www-data /var/www/html/temp/ \
-    && chown -R www-data /var/www/html/templates/
+    && mkdir -p ${SESSIONS_DIR} \
+    && chown -R www-data ${SESSIONS_DIR} \
+    && chown -R www-data ${WORKDIR}/db/ \
+    && chown -R www-data ${WORKDIR}/dump/ \
+    && chown -R www-data ${WORKDIR}/img/trackers/ \
+    && chown -R www-data ${WORKDIR}/img/wiki/ \
+    && chown -R www-data ${WORKDIR}/img/wiki_up/ \
+    && chown -R www-data ${WORKDIR}/modules/cache/ \
+    && chown -R www-data ${WORKDIR}/temp/ \
+    && chown -R www-data ${WORKDIR}/templates/
 
 VOLUME [ \
     "${WORKDIR}/files/", \
@@ -52,7 +52,7 @@ VOLUME [ \
     "${WORKDIR}/modules/cache/", \
     "${WORKDIR}/storage/", \
     "${WORKDIR}/temp/", \
-    "/var/www/sessions/" \
+    "${SESSIONS_DIR}/" \
 ]
 EXPOSE 80 443
 CMD ["apache2-foreground"]
