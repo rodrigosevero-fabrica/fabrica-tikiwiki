@@ -1,6 +1,9 @@
 FROM rodrigosevero/fabrica-php-fpm
 MAINTAINER Rodrigo Severo <rodrigo@fabricadeideias.com>
 
+# Mosty ripped off from https://github.com/fabiomontefuscolo/docker-tikiwiki
+# by Fábio Montefuscolo.
+
 WORKDIR "/var/www/html"
 
 ARG TIKI_SOURCE="https://sourceforge.net/projects/tikiwiki/files/Tiki_18.x_Alcyone/18.3/tiki-18.3.tar.gz/download"
