@@ -1,4 +1,4 @@
-FROM montefuscolo/php:7.1-apache
+FROM rodrigosevero/fabrica-php-fpm
 MAINTAINER Rodrigo Severo <rodrigo@fabricadeideias.com>
 
 WORKDIR "/var/www/html"
@@ -7,21 +7,13 @@ ARG TIKI_SOURCE="https://sourceforge.net/projects/tikiwiki/files/Tiki_18.x_Alcyo
 ARG WORKDIR="/var/www/html"
 ARG SESSIONS_DIR="/var/www/sessions"
 
-# If you have https_proxy with SslBump, place it's cetificate
-# in this variable to have curl and composer content cached
-ARG HTTPS_PROXY_CERT=""
-
-RUN echo "${HTTPS_PROXY_CERT}" > /usr/local/share/ca-certificates/https_proxy.crt \
-    && update-ca-certificates \
-    && curl -o tiki.tar.gz -L "${TIKI_SOURCE}" \
+RUN apk add --no-cache bash
+RUN curl -o tiki.tar.gz -L "${TIKI_SOURCE}" \
     && chown root: ${WORKDIR} \
     && tar -C ${WORKDIR} --no-same-owner -zxf tiki.tar.gz --strip 1 \
-    && composer global require hirak/prestissimo \
-    && composer install --working-dir ${WORKDIR}/vendor_bundled --prefer-dist \
     && rm tiki.tar.gz \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* \ 
-    && rm -rf /root/.composer \
+    && rm -rf /tmp/* \
     && { \
         echo "<?php"; \
         echo "    \$db_tiki        = getenv('TIKI_DB_DRIVER') ?: 'mysqli';"; \
@@ -56,5 +48,3 @@ VOLUME [ \
     "${WORKDIR}/temp/", \
     "${SESSIONS_DIR}/" \
 ]
-EXPOSE 80 443
-CMD ["apache2-foreground"]
