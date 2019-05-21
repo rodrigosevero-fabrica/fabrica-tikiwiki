@@ -41,6 +41,36 @@ RUN curl -o tiki.tar.gz -L "${TIKI_SOURCE}" \
     && chown -R www-data ${WORKDIR}/temp/ \
     && chown -R www-data ${WORKDIR}/templates/
 
+# Installing necessary extensions for LDAP authentication.
+RUN apk add --no-cache libressl-dev openldap-dev \
+    && docker-php-ext-install ldap
+
+# Installing necessary libraries and extensions for image support (GD).
+RUN apk add --no-cache \
+        freetype-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd
+
+# Installing necessary libraries and extensions for better language detection.
+RUN apk add --no-cache icu-dev \
+    && docker-php-ext-install intl
+
+# Installing extension calendar.
+RUN docker-php-ext-install calendar
+
+# Installing necessary libraries and extensions zip.
+RUN apk add --no-cache libzip-dev \
+    && docker-php-ext-install zip
+
+# Use the default production configuration.
+RUN mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
+
+# Creating temporary upload directory.
+RUN mkdir /var/www/uploads \
+    && chown 82 /var/www/uploads
+
 VOLUME [ \
     "${WORKDIR}/files/", \
     "${WORKDIR}/img/trackers/", \
