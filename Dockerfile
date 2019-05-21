@@ -10,6 +10,9 @@ ARG TIKI_SOURCE="https://sourceforge.net/projects/tikiwiki/files/Tiki_18.x_Alcyo
 ARG WORKDIR="/var/www/html"
 ARG SESSIONS_DIR="/var/www/sessions"
 
+# If you want to set TikiWiki DB parameters through docker configs, create the necessary configs for
+# file_get_contents calls below. If you want to set TikiWiki DB parameters through environment 
+# variables, set the desired varaibles for the getenv calls below.
 RUN apk add --no-cache bash
 RUN curl -o tiki.tar.gz -L "${TIKI_SOURCE}" \
     && chown root: ${WORKDIR} \
@@ -19,12 +22,12 @@ RUN curl -o tiki.tar.gz -L "${TIKI_SOURCE}" \
     && rm -rf /tmp/* \
     && { \
         echo "<?php"; \
-        echo "    \$db_tiki        = getenv('TIKI_DB_DRIVER') ?: 'mysqli';"; \
-        echo "    \$dbversion_tiki = getenv('TIKI_DB_VERSION') ?: '18';"; \
-        echo "    \$host_tiki      = getenv('TIKI_DB_HOST') ?: 'db';"; \
-        echo "    \$user_tiki      = getenv('TIKI_DB_USER');"; \
-        echo "    \$pass_tiki      = getenv('TIKI_DB_PASS');"; \
-        echo "    \$dbs_tiki       = getenv('TIKI_DB_NAME') ?: 'tikiwiki';"; \
+        echo "    \$db_tiki        = file_get_contents('/TIKI_DB_DRIVER') !== FALSE ? file_get_contents('/TIKI_DB_DRIVER') : getenv('TIKI_DB_DRIVER') ?: 'mysqli';"; \
+        echo "    \$dbversion_tiki = file_get_contents('/TIKI_DB_VERSION') !== FALSE ? file_get_contents('/TIKI_DB_VERSION') : getenv('TIKI_DB_VERSION') ?: '18';"; \
+        echo "    \$host_tiki      = file_get_contents('/TIKI_DB_HOST') !== FALSE ? file_get_contents('/TIKI_DB_HOST') : getenv('TIKI_DB_HOST') ?: 'db';"; \
+        echo "    \$user_tiki      = file_get_contents('/TIKI_DB_USER') !== FALSE ? file_get_contents('/TIKI_DB_USER') : getenv('TIKI_DB_USER');"; \
+        echo "    \$pass_tiki      = file_get_contents('/run/secrets/TIKI_DB_PASS') !== FALSE ? file_get_contents('/run/secrets/TIKI_DB_PASS') : getenv('TIKI_DB_PASS');"; \
+        echo "    \$dbs_tiki       = file_get_contents('/TIKI_DB_NAME') !== FALSE ? file_get_contents('/TIKI_DB_NAME') : getenv('TIKI_DB_NAME') ?: 'tikiwiki';"; \
     } > ${WORKDIR}/db/local.php \
     && {\
         echo "session.save_path=${SESSIONS_DIR}"; \
@@ -70,6 +73,9 @@ RUN mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 # Creating temporary upload directory.
 RUN mkdir /var/www/uploads \
     && chown 82 /var/www/uploads
+
+# bash is not necessary for production.
+RUN apk del --no-cache bash
 
 VOLUME [ \
     "${WORKDIR}/files/", \
